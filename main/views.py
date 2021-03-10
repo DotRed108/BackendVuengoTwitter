@@ -20,7 +20,7 @@ def home_post_list(request):
     if request.method == 'GET':
         post_set = Post.objects.filter(
                     Q(author=request.user) | Q(author__in=request.user.following.all())
-                ).order_by('-date_posted')
+                ).filter(parent_post__isnull=True).order_by('-date_posted')
         serializer = PostSerializer(post_set, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     else:
@@ -32,7 +32,7 @@ def all_post_list(request):
     if request.method == 'GET':
         post_set = Post.objects.all()
         serializer = PostSerializer(post_set, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     else:
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -53,9 +53,13 @@ def create_post(request):
 @api_view(['GET'])
 def detail_post(request, pk):
     post = get_object_or_404(Post, pk=pk)
+    post_set = post.child_posts.all().order_by('date_posted')
+    post_list = [post]
+    for item in post_set:
+        post_list.append(item)
     if request.method == 'GET':
-        serializer = PostSerializer(post)
-        return Response(serializer.data)
+        serializer = PostSerializer(post_list, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     else:
         return Response(status=status.HTTP_400_BAD_REQUEST)
 

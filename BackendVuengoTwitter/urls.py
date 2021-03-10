@@ -11,9 +11,9 @@ router = routers.DefaultRouter()
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('main.urls')),
+    path('', include('users.urls')),
     path('api/', include('rest_framework.urls')),
     path('api/get-token/', get_csrf_token, name="get-token"),
-    path('', include('users.urls')),
 ]
 
 urlpatterns += router.urls

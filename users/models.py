@@ -8,7 +8,7 @@ class User(AbstractUser):
     location = models.CharField(max_length=30, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     profile_pic = models.ImageField(default='default.jpg', upload_to='profile_pics')
-    followers = models.ManyToManyField('self', related_name='following', symmetrical=False)
+    followers = models.ManyToManyField('self', related_name='following', symmetrical=False, blank=True)
 
     def follower_total(self):
         return self.followers.count()
