@@ -1,19 +1,20 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 from PIL import Image
 
 
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+class User(AbstractUser):
+    bio = models.TextField(max_length=250, blank=True)
+    location = models.CharField(max_length=30, blank=True)
+    birth_date = models.DateField(null=True, blank=True)
     profile_pic = models.ImageField(default='default.jpg', upload_to='profile_pics')
-    bio = models.CharField(max_length=250)
-    follows = models.ManyToManyField(User, related_name='follows')
+    followers = models.ManyToManyField('self', related_name='following', symmetrical=False)
 
     def follower_total(self):
-        return self.follows.count()
+        return self.followers.count()
 
-    def __str__(self):
-        return f'{self.user.username}.Profile'
+    def following_total(self):
+        return self.following.count()
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

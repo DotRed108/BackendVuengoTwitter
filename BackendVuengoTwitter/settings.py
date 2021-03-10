@@ -83,7 +83,6 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
@@ -134,6 +133,8 @@ LOGIN_URL = 'sign-in'
 CRISPY_TEMPLATE_PACK = 'uni_form'
 
 CSRF_USE_SESSIONS = True
+
+AUTH_USER_MODEL = 'users.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

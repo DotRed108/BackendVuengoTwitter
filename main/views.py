@@ -1,5 +1,4 @@
 from django.shortcuts import get_object_or_404
-from django.contrib.auth.models import User
 from django.db.models import Q
 from .models import Post
 from django.middleware.csrf import get_token
@@ -20,7 +19,7 @@ def get_csrf_token(request):
 def home_post_list(request):
     if request.method == 'GET':
         post_set = Post.objects.filter(
-                    Q(author=request.user) | Q(author__in=User.objects.filter(profile__in=request.user.follows.all()))
+                    Q(author=request.user) | Q(author__in=request.user.following.all())
                 ).order_by('-date_posted')
         serializer = PostSerializer(post_set, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

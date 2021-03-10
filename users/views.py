@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from django.contrib.auth.models import User
+from users.models import User
 from .serializers import UserDetailSerializer, UserUpdateSerializer
 from .permissions import CanDeleteUser, CanUpdateUser
 from rest_framework.viewsets import ModelViewSet
@@ -32,14 +32,14 @@ class UserViewSet(ModelViewSet):
     @action(["POST"], detail=True)
     def follow(self, request, *args, **kwargs):
         target_user = get_object_or_404(User, id=kwargs.get('pk'))
-        target_user.profile.follows.add(request.user)
+        target_user.followers.add(request.user)
         return Response(status=status.HTTP_201_CREATED)
 
     @action(["POST"], detail=True)
     def unfollow(self, request, *args, **kwargs):
         target_user = get_object_or_404(User, id=kwargs.get('pk'))
-        if len(target_user.profile.follows.filter(id=request.user.id)) != 0:
-            target_user.profile.follows.remove(request.user)
+        if len(target_user.followers.filter(id=request.user.id)) != 0:
+            target_user.followers.remove(request.user)
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(status=status.HTTP_201_CREATED)
