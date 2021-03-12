@@ -21,3 +21,10 @@ class UserDetailSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'email', 'profile_pic', 'bio', 'location', 'birth_date']
+
+
+class UserCreateSerializer(ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password']

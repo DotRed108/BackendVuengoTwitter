@@ -1,9 +1,9 @@
 from django.shortcuts import get_object_or_404
 from users.models import User
-from .serializers import UserDetailSerializer, UserUpdateSerializer
+from .serializers import UserDetailSerializer, UserUpdateSerializer, UserCreateSerializer
 from .permissions import CanDeleteUser, CanUpdateUser
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
@@ -19,6 +19,8 @@ class UserViewSet(ModelViewSet):
             self.permission_classes = [CanUpdateUser]
         elif self.action == 'delete':
             self.permission_classes = [CanDeleteUser]
+        elif self.action == 'create':
+            self.permission_classes = [AllowAny]
         else:
             self.permission_classes = [IsAuthenticated]
         return [permission() for permission in self.permission_classes]
@@ -26,6 +28,8 @@ class UserViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'update' or self.action == 'partial_update':
             return UserUpdateSerializer
+        elif self.action == 'create':
+            return UserCreateSerializer
         else:
             return UserDetailSerializer
 
