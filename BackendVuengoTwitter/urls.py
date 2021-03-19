@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
-from django.contrib.auth.views import LogoutView, LoginView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 from rest_framework import routers
 from main.views import get_csrf_token
 
@@ -13,6 +13,9 @@ urlpatterns = [
     path('', include('main.urls')),
     path('', include('users.urls')),
     path('api/', include('rest_framework.urls')),
+    path('api-token/', TokenObtainPairView.as_view()),
+    path('api-token-refresh/', TokenRefreshView.as_view()),
+    path('api-token-verify/', TokenVerifyView.as_view()),
     path('api/get-token/', get_csrf_token, name="get-token"),
 ]
 

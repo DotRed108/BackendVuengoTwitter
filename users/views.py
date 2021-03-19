@@ -4,7 +4,7 @@ from .serializers import UserDetailSerializer, UserUpdateSerializer, UserCreateS
 from .permissions import CanDeleteUser, CanUpdateUser
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -47,3 +47,11 @@ class UserViewSet(ModelViewSet):
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET'])
+def get_logged_in_user(request):
+    if request.method == 'GET':
+        return Response({'userId': request.user.id}, status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
