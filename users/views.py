@@ -1,12 +1,14 @@
 from django.shortcuts import get_object_or_404
 from users.models import User
-from .serializers import UserDetailSerializer, UserUpdateSerializer, UserCreateSerializer
+from .serializers import UserDetailSerializer, UserUpdateSerializer, UserCreateSerializer, UserSerializer
 from .permissions import CanDeleteUser, CanUpdateUser
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
+import random
 
 
 class UserViewSet(ModelViewSet):
@@ -42,11 +44,20 @@ class UserViewSet(ModelViewSet):
     @action(["POST"], detail=True)
     def unfollow(self, request, *args, **kwargs):
         target_user = get_object_or_404(User, id=kwargs.get('pk'))
-        if len(target_user.followers.filter(id=request.user.id)) != 0:
-            target_user.followers.remove(request.user)
-        else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        target_user.followers.remove(request.user)
         return Response(status=status.HTTP_201_CREATED)
+
+
+def serialize_profile_data(target_user, request):
+    serializer = UserDetailSerializer(target_user)
+    response_data = serializer.data
+    if request.user.id in serializer.data['followers']:
+        response_data['isFollowing'] = 'true'
+    else:
+        response_data['isFollowing'] = 'false'
+    response_data['followers'] = len(serializer.data['followers'])
+    response_data['following'] = len(serializer.data['following'])
+    return response_data
 
 
 @api_view(['GET'])
@@ -55,3 +66,50 @@ def get_logged_in_user(request):
         return Response({'userId': request.user.id}, status=status.HTTP_200_OK)
     else:
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def get_random_profile(request):
+    if request.method == 'GET':
+        query_set = User.objects.all()
+        target_user = query_set[random.randint(0, len(query_set))]
+        response_data = serialize_profile_data(target_user, request)
+        return Response(response_data, status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def get_profile(request, pk):
+    if request.method == 'GET':
+        target_user = get_object_or_404(User, pk=pk)
+        response_data = serialize_profile_data(target_user, request)
+        return Response(response_data, status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def follower_list(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    if request.method == 'GET':
+        paginator = PageNumberPagination()
+        paginator.page_size = 10
+        user_set = paginator.paginate_queryset(user.followers.all(), request)
+        serializers = UserSerializer(user_set, many=True)
+        return paginator.get_paginated_response(serializers.data)
+    else:
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+@api_view(['GET'])
+def following_list(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    if request.method == 'GET':
+        paginator = PageNumberPagination()
+        paginator.page_size = 10
+        user_set = paginator.paginate_queryset(user.following.all(), request)
+        serializers = UserSerializer(user_set, many=True)
+        return paginator.get_paginated_response(serializers.data)
+    else:
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)

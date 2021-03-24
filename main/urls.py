@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import home_post_list,  create_post, detail_post, delete_post, update_post, like_post, unlike_post,\
-    like_list, user_post_list, search_post_list, bookmarks_list, bookmark_post, remove_bookmark_post
+    like_list, user_post_list, search_post_list, bookmarks_list, bookmark_post, remove_bookmark_post, all_posts
 
 urlpatterns = [
     path('api/home/', home_post_list, name="home"),
@@ -16,4 +16,5 @@ urlpatterns = [
     path('api/bookmark-list/', bookmarks_list, name="bookmark-list"),
     path('api/bookmark-post/<int:pk>/', bookmark_post, name="bookmark-post"),
     path('api/remove-bookmark-post/<int:pk>/', remove_bookmark_post, name="remove-bookmark-post"),
+    path('api/all-posts/', all_posts, name="all-posts-list"),
 ]

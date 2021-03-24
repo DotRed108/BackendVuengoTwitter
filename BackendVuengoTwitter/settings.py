@@ -168,7 +168,7 @@ REST_FRAMEWORK = {
     'DATETIME_INPUT_FORMATS': ['%d-%m-%Y %H:%M:%S %z', '%d-%m-%Y'],
     'DATE_FORMAT': '%d-%b-%Y',
     'DATE_INPUT_FORMATS': ['%d-%m-%Y'],
-    'DEFAULT_PAGINATION_CLASS': None,
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',

@@ -6,21 +6,21 @@ class UserSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username']
+        fields = ['id', 'username', 'profile_pic']
 
 
 class UserUpdateSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'profile_pic', 'bio']
+        fields = ['theme', 'profile_pic', 'bio']
 
 
 class UserDetailSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'profile_pic', 'bio', 'following', 'followers', 'post_set', 'bookmarks']
+        fields = ['id', 'username', 'profile_pic', 'bio', 'following', 'followers', 'bookmarks', 'theme']
 
 
 class UserLimitedDetailSerializer(ModelSerializer):

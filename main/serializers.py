@@ -16,12 +16,13 @@ class PostCreateSerializer(ModelSerializer):
         author = request.user
         post = Post.objects.create(author=author,
                                    parent_post=validated_data.get('parent_post'),
-                                   content=validated_data.get('content'))
+                                   content=validated_data.get('content'),
+                                   image_content=validated_data.get('image_content')),
         return post
 
     class Meta:
         model = Post
-        fields = ['content', 'parent_post']
+        fields = ['content', 'parent_post', 'image_content']
 
 
 class PostUpdateSerializer(ModelSerializer):
