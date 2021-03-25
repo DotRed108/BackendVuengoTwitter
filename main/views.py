@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, Max
+from django.db.models.functions import Length
 from .models import Post
 from django.middleware.csrf import get_token
 from django.http.response import JsonResponse
@@ -9,6 +10,7 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from users.serializers import UserSerializer, UserLimitedDetailSerializer
 from rest_framework.pagination import PageNumberPagination
+from datetime import date
 
 
 def get_csrf_token(request):
@@ -16,15 +18,16 @@ def get_csrf_token(request):
     return JsonResponse({'token': token})
 
 
-def serialize_posts_with_user_data(query_set, request):
+def serialize_posts_with_user_data(query_set, request, many=True):
     paginator = PageNumberPagination()
     # This is where the actual pagination occurs
     paginator.page_size = 10
     post_set = paginator.paginate_queryset(query_set, request)
+    post_set = query_set
     author_list = []
     for item in post_set:
         author_list.append(item.author)
-    serializer1 = UserLimitedDetailSerializer(author_list, many=True)
+    serializer1 = UserLimitedDetailSerializer(author_list, many=many)
     serializer = PostSerializer(post_set, many=True)
     i = 0
     while i < len(serializer.data):
@@ -212,3 +215,23 @@ def remove_bookmark_post(request, pk):
         return Response(status=status.HTTP_201_CREATED)
     else:
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+@api_view(['GET'])
+def top_post_today(request):
+    if request.method == 'GET':
+        today = date.today()
+        query_set = Post.objects.filter(Q(date_posted__day=today.day) & Q(date_posted__year=today.year)
+                                        & Q(date_posted__month=today.month))
+        post_list = []
+        highest_likes = 0
+        most_liked = None
+        for item in query_set:
+            if item.likes.count() > highest_likes:
+                highest_likes = item.likes.count()
+                most_liked = item
+        post_list.append(most_liked)
+        serializer = serialize_posts_with_user_data(post_list, request)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
