@@ -1,6 +1,5 @@
 from django.shortcuts import get_object_or_404
-from django.db.models import Q, Max
-from django.db.models.functions import Length
+from django.db.models import Q, Count, Max
 from .models import Post
 from django.middleware.csrf import get_token
 from django.http.response import JsonResponse
@@ -23,7 +22,6 @@ def serialize_posts_with_user_data(query_set, request, many=True):
     # This is where the actual pagination occurs
     paginator.page_size = 10
     post_set = paginator.paginate_queryset(query_set, request)
-    post_set = query_set
     author_list = []
     for item in post_set:
         author_list.append(item.author)
@@ -222,15 +220,9 @@ def top_post_today(request):
     if request.method == 'GET':
         today = date.today()
         query_set = Post.objects.filter(Q(date_posted__day=today.day) & Q(date_posted__year=today.year)
-                                        & Q(date_posted__month=today.month))
-        post_list = []
-        highest_likes = 0
-        most_liked = None
-        for item in query_set:
-            if item.likes.count() > highest_likes:
-                highest_likes = item.likes.count()
-                most_liked = item
-        post_list.append(most_liked)
+                                        & Q(date_posted__month=today.month))\
+                                        .annotate(countLikes=Count('likes')).order_by('-countLikes')
+        post_list = [query_set[0]]
         serializer = serialize_posts_with_user_data(post_list, request)
         return Response(serializer.data, status=status.HTTP_200_OK)
     else:

@@ -8,7 +8,6 @@ from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
-import random
 
 
 class UserViewSet(ModelViewSet):
@@ -71,8 +70,8 @@ def get_logged_in_user(request):
 @api_view(['GET'])
 def get_random_profile(request):
     if request.method == 'GET':
-        query_set = User.objects.all()
-        target_user = query_set[random.randint(0, len(query_set))]
+        query_set = User.objects.all().order_by('?')
+        target_user = query_set[0]
         response_data = serialize_profile_data(target_user, request)
         return Response(response_data, status=status.HTTP_200_OK)
     else:
