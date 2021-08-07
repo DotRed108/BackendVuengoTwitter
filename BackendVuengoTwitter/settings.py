@@ -40,11 +40,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main.apps.MainConfig',
     'users.apps.UsersConfig',
+    'message.apps.MessageConfig',
     'rest_framework',
     'corsheaders',
-    'rest_framework_simplejwt.token_blacklist'
-
-
+    'rest_framework_simplejwt.token_blacklist',
+    'channels'
 ]
 
 MIDDLEWARE = [
@@ -86,7 +86,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'BackendVuengoTwitter.wsgi.application'
+ASGI_APPLICATION = 'BackendVuengoTwitter.routing.application'
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
@@ -148,8 +157,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 LOGIN_REDIRECT_URL = 'home'
 LOGIN_URL = 'sign-in'
-
-CRISPY_TEMPLATE_PACK = 'uni_form'
 
 CSRF_USE_SESSIONS = True
 
